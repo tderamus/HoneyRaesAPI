@@ -1,3 +1,29 @@
+using HoneyRaesAPI.Models;
+
+List<Customer> customers = new List<Customer>
+{
+    new Customer { Id = 1, Name = "Oshay Jackson", Address = "123 Elm St" },
+    new Customer { Id = 2, Name = "Calvin Brodus", Address = "456 Oak St" },
+    new Customer { Id = 3, Name = "Greg Street", Address = "789 Pine St" }
+};
+
+List<Employee> employees = new List<Employee>
+{
+    new Employee { Id = 1, Name = "Brodie Quinn", Specialty = "Electrical" },
+    new Employee { Id = 2, Name = "Orlando Smith", Specialty = "Plumbing" },
+};
+
+List<ServiceTicket> serviceTickets = new List<ServiceTicket>
+{
+    new ServiceTicket { Id = 1, CustomerId = 1, Description = "My AC is broken", Emergency = true, DateCompleted = new DateTime(2022, 7, 1) },
+    new ServiceTicket { Id = 2, CustomerId = 2, EmployeeId = 2, Description = "My toilet is clogged", Emergency = false, DateCompleted = new DateTime(2021, 5, 2) },
+    new ServiceTicket { Id = 3, CustomerId = 3, EmployeeId = 1, Description = "My lights won't turn on", Emergency = true, DateCompleted = new DateTime(2024, 6, 3) },
+    new ServiceTicket { Id = 4, CustomerId = 1, Description = "My AC is broken", Emergency = true },
+    new ServiceTicket { Id = 5, CustomerId = 2, EmployeeId = 2, Description = "My toilet is clogged", Emergency = false },
+    new ServiceTicket { Id = 6, CustomerId = 3, Description = "My lights won't turn on", Emergency = true, DateCompleted = new DateTime(2025, 1, 4) },
+};
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,28 +45,16 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/servicetickets", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    return serviceTickets;
+});
 
-app.MapGet("/hello", () => 
-    {
-    return "hello";
+app.MapGet("/servicetickets/{id}", (int id) =>
+{
+    return serviceTickets.FirstOrDefault(st => st.Id == id);
 });
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
