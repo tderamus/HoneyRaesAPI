@@ -58,7 +58,6 @@ app.MapGet("/servicetickets/{id}", (int id) =>
         return Results.NotFound();
     }
     serviceTicket.Employee = employees.FirstOrDefault(e => e.Id == serviceTicket.EmployeeId);
-    // Add the customer data to the service ticket when sending a request to the get-by-id endpoint
     serviceTicket.Customer = customers.FirstOrDefault(c => c.Id == serviceTicket.CustomerId);
     return Results.Ok(serviceTicket);
 });
