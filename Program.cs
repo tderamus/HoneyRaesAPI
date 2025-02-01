@@ -139,7 +139,7 @@ app.MapPut("servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
 });
 
 // Post a time stamp for a service ticket completion
-app.MapPost("servicetickets/{id}/complete", (int id) =>
+app.MapPost("serviceTickets/{id}/complete", (int id) =>
 {
     ServiceTicket ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
     if (ticketToComplete == null)
