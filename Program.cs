@@ -45,11 +45,13 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
+// Get all service tickets
 app.MapGet("/servicetickets", () =>
 {
     return serviceTickets;
 });
 
+// Get service ticket by id
 app.MapGet("/servicetickets/{id}", (int id) =>
 {
     ServiceTicket serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
@@ -58,17 +60,29 @@ app.MapGet("/servicetickets/{id}", (int id) =>
         return Results.NotFound();
     }
     serviceTicket.Employee = employees.FirstOrDefault(e => e.Id == serviceTicket.EmployeeId);
-    // Add the customer data to the service ticket when sending a request to the get-by-id endpoint
     serviceTicket.Customer = customers.FirstOrDefault(c => c.Id == serviceTicket.CustomerId);
     return Results.Ok(serviceTicket);
 });
 
+// Delete a service ticket
+app.MapDelete("servicetickets/{id}", (int id) =>
+{
+    ServiceTicket serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
+    if (serviceTicket == null)
+    {
+        return Results.NotFound();
+    }
+    serviceTickets.Remove(serviceTicket);
+    return Results.NoContent();
+});
+
+// Get all employees
 app.MapGet("/employees", () =>
 {
     return employees;
 });
 
-
+// Get employee by id
 app.MapGet("/employees/{id}", (int id) =>
 {
     Employee employee = employees.FirstOrDefault(e => e.Id == id);
@@ -80,11 +94,13 @@ app.MapGet("/employees/{id}", (int id) =>
     return Results.Ok(employee);
 });
 
+// Get all customers
 app.MapGet("/customers", () =>
 {
     return customers;
 });
 
+// Get customer by id
 app.MapGet("customers/{id}", (int id) =>
 {
     Customer customer = customers.FirstOrDefault(c => c.Id == id);
@@ -94,6 +110,44 @@ app.MapGet("customers/{id}", (int id) =>
     }
     customer.ServiceTickets = serviceTickets.Where(st => st.CustomerId == id).ToList();
     return Results.Ok(customer);
+});
+
+// Enter service ticket
+app.MapPost("serviceTickets", (ServiceTicket serviceTicket) =>
+{
+    serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
+    serviceTickets.Add(serviceTicket);
+    return  serviceTicket;
+});
+
+// Update a service ticket
+app.MapPut("servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
+{
+    ServiceTicket ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == id);
+    int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
+    if (ticketToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    //the id in the request route doesn't match the id from the ticket in the request body. That's a bad request!
+    if (id != serviceTicket.Id)
+    {
+        return Results.BadRequest();
+    }
+    serviceTickets[ticketIndex] = serviceTicket;
+    return Results.Ok();
+});
+
+// Post a time stamp for a service ticket completion
+app.MapPost("serviceTickets/{id}/complete", (int id) =>
+{
+    ServiceTicket ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
+    if (ticketToComplete == null)
+    {
+        return Results.NotFound();
+    }
+    ticketToComplete.DateCompleted = DateTime.Now;
+    return Results.Ok(ticketToComplete);
 });
 
 app.Run();
