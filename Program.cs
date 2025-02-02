@@ -20,7 +20,12 @@ List<ServiceTicket> serviceTickets = new List<ServiceTicket>
     new ServiceTicket { Id = 3, CustomerId = 3, EmployeeId = 1, Description = "My lights won't turn on", Emergency = true, DateCompleted = new DateTime(2024, 6, 3) },
     new ServiceTicket { Id = 4, CustomerId = 1, Description = "My AC is broken", Emergency = true },
     new ServiceTicket { Id = 5, CustomerId = 2, EmployeeId = 2, Description = "My toilet is clogged", Emergency = false },
-    new ServiceTicket { Id = 6, CustomerId = 3, Description = "My lights won't turn on", Emergency = true, DateCompleted = new DateTime(2025, 1, 4) },
+    new ServiceTicket { Id = 6, CustomerId = 3, Description = "My lights won't turn on", Emergency = true, },
+    new ServiceTicket { Id = 7, CustomerId = 3, Description = "Stain in front carpet", Emergency = false, },
+    new ServiceTicket { Id = 8, CustomerId = 1, Description = "My lights won't turn on", Emergency = true, },
+    new ServiceTicket { Id = 8, CustomerId = 1, Description = "Stain in front carpet", Emergency = false, },
+    new ServiceTicket { Id = 10, CustomerId = 2, Description = "My lights won't turn on", Emergency = true, },
+    new ServiceTicket { Id = 11, CustomerId = 2, Description = "Window is broken", Emergency = true, DateCompleted = DateTime.MinValue},
 };
 
 
@@ -149,6 +154,21 @@ app.MapPost("serviceTickets/{id}/complete", (int id) =>
     ticketToComplete.DateCompleted = DateTime.Now;
     return Results.Ok(ticketToComplete);
 });
+
+
+// Return all emergency and incomplete service tickets
+app.MapGet("serviceTickets/emergency", () =>
+{
+    return serviceTickets.Where(st => st.Emergency == true && st.DateCompleted == DateTime.MinValue );
+});
+
+// Return all service tickets that are not assigned to an employee
+app.MapGet("serviceTickets/unassigned", () =>
+{
+    return serviceTickets.Where(st => st.EmployeeId == null);
+});
+
+
 
 app.Run();
 
