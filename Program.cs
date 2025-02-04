@@ -34,8 +34,16 @@ List<ServiceTicket> serviceTickets = new List<ServiceTicket>
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
 
 // Add services to the container.
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -47,6 +55,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("AllowReactApp");
+
 app.UseHttpsRedirection();
 
 var summaries = new[]
@@ -55,13 +65,13 @@ var summaries = new[]
 };
 
 // Get all service tickets
-app.MapGet("/servicetickets", () =>
+app.MapGet("/api/serviceTickets", () =>
 {
     return serviceTickets;
 });
 
 // Get service ticket by id
-app.MapGet("/servicetickets/{id}", (int id) =>
+app.MapGet("/api/servicetickets/{id}", (int id) =>
 {
     ServiceTicket serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
     if (serviceTicket == null)
@@ -74,7 +84,7 @@ app.MapGet("/servicetickets/{id}", (int id) =>
 });
 
 // Delete a service ticket
-app.MapDelete("servicetickets/{id}", (int id) =>
+app.MapDelete("/api/servicetickets/{id}", (int id) =>
 {
     ServiceTicket serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
     if (serviceTicket == null)
@@ -86,13 +96,13 @@ app.MapDelete("servicetickets/{id}", (int id) =>
 });
 
 // Get all employees
-app.MapGet("/employees", () =>
+app.MapGet("/api/employees", () =>
 {
     return employees;
 });
 
 // Get employee by id
-app.MapGet("/employees/{id}", (int id) =>
+app.MapGet("/api/employees/{id}", (int id) =>
 {
     Employee employee = employees.FirstOrDefault(e => e.Id == id);
     if (employee == null)
@@ -104,13 +114,13 @@ app.MapGet("/employees/{id}", (int id) =>
 });
 
 // Get all customers
-app.MapGet("/customers", () =>
+app.MapGet("/api/customers", () =>
 {
     return customers;
 });
 
 // Get customer by id
-app.MapGet("customers/{id}", (int id) =>
+app.MapGet("/api/customers/{id}", (int id) =>
 {
     Customer customer = customers.FirstOrDefault(c => c.Id == id);
     if (customer == null)
@@ -122,7 +132,7 @@ app.MapGet("customers/{id}", (int id) =>
 });
 
 // Enter service ticket
-app.MapPost("serviceTickets", (ServiceTicket serviceTicket) =>
+app.MapPost("/api/servicetickets", (ServiceTicket serviceTicket) =>
 {
     serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
     serviceTickets.Add(serviceTicket);
@@ -130,7 +140,7 @@ app.MapPost("serviceTickets", (ServiceTicket serviceTicket) =>
 });
 
 // Update a service ticket
-app.MapPut("servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
+app.MapPut("/api/servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
 {
     ServiceTicket ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == id);
     int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
@@ -148,7 +158,7 @@ app.MapPut("servicetickets/{id}", (int id, ServiceTicket serviceTicket) =>
 });
 
 // Post a time stamp for a service ticket completion
-app.MapPost("serviceTickets/{id}/complete", (int id) =>
+app.MapPost("/api/serviceTickets/{id}/complete", (int id) =>
 {
     ServiceTicket ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
     if (ticketToComplete == null)
@@ -161,19 +171,19 @@ app.MapPost("serviceTickets/{id}/complete", (int id) =>
 
 
 // Return all emergency and incomplete service tickets
-app.MapGet("serviceTickets/emergency", () =>
+app.MapGet("/api/serviceTickets/emergency", () =>
 {
     return serviceTickets.Where(st => st.Emergency == true && st.DateCompleted == DateTime.MinValue );
 });
 
 // Return all service tickets that are not assigned to an employee
-app.MapGet("serviceTickets/unassigned", () =>
+app.MapGet("/api/serviceTickets/unassigned", () =>
 {
     return serviceTickets.Where(st => st.EmployeeId == null);
 });
 
 // Return all customers with service tickets not closed in over a year
-app.MapGet("customers/overdue", () =>
+app.MapGet("/api/customers/overdue", () =>
 {
     return customers.Where(c => serviceTickets.Any(st => st.CustomerId == c.Id && st.DateCompleted == DateTime.MinValue && DateTime.Now.Year - st.DateCompleted.Year > 1));
 });
