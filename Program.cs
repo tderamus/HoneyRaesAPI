@@ -11,6 +11,10 @@ List<Employee> employees = new List<Employee>
 {
     new Employee { Id = 1, Name = "Brodie Quinn", Specialty = "Electrical" },
     new Employee { Id = 2, Name = "Orlando Smith", Specialty = "Plumbing" },
+    new Employee { Id = 3, Name = "Jasmine Green", Specialty = "HVAC" },
+    new Employee { Id = 4, Name = "Jackie Brown", Specialty = "Drywall" },
+    new Employee { Id = 5, Name = "Morgan White", Specialty = "Painting" },
+    new Employee { Id = 6, Name = "Terry Black", Specialty = "Carpentry" }
 };
 
 List<ServiceTicket> serviceTickets = new List<ServiceTicket>
@@ -168,7 +172,11 @@ app.MapGet("serviceTickets/unassigned", () =>
     return serviceTickets.Where(st => st.EmployeeId == null);
 });
 
-
+// Return all customers with service tickets not closed in over a year
+app.MapGet("customers/overdue", () =>
+{
+    return customers.Where(c => serviceTickets.Any(st => st.CustomerId == c.Id && st.DateCompleted == DateTime.MinValue && DateTime.Now.Year - st.DateCompleted.Year > 1));
+});
 
 app.Run();
 
